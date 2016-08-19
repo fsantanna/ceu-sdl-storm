@@ -1,0 +1,25 @@
+#include "c.ceu"
+#include "sdl/sdl.ceu"
+
+native/pos do
+    ##include <time.h>
+end
+
+#define WIN_W 640
+#define WIN_H 480
+
+var& _SDL_Renderer_ptr ren;
+watching SDL_go("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
+            => (ren)
+do
+    #include "storm.ceu"
+
+    _srand(_time(null));
+
+    spawn Car();
+    spawn Storm();
+
+    await FOREVER;
+end
+
+escape 0;

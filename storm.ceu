@@ -185,6 +185,42 @@ do
     end
 end
 
+code/await Explosion (var int x) => void
+do
+    var int radius = 80;
+    var SDL_Rect rct = val SDL_Rect(x - radius,
+                                    (WIN_H + radius*0.2 - radius) as int,
+                                    radius*2,
+                                    radius*2);
+
+    // explode 40w/s
+    //_Mix_PlayChannel(-1, outer.snd_explosion, 0);
+    watching 100ms do
+        every SDL_REDRAW do
+            _SDL_SetRenderDrawColor(outer.ren, 0xFF, 0x9D, 0x46, 0x00);
+            _SDL_RenderFillRect(outer.ren, (&&rct as _SDL_Rect&&));
+        end
+#if 0
+        par do
+            var float d = DIM;
+            var float v = 40 * DIM;
+            var int dt;
+            every dt in SDL_DT do
+                d = d + v*dt/1000;
+                obj.rect.w = d as int;
+                obj.rect.h = d as int;
+            end
+        with
+            every SDL_REDRAW do
+                _filledCircleRGBA(outer.ren, obj.rect.x,obj.rect.y,obj.rect.w,
+                                             0xFF,0x00,0x00,0xFF);
+            end
+        end
+#endif
+    end
+
+end
+
 code/await Light (pool&[] Light    lights,
                   var     Vector2D pos_ini,
                   var     int?     direction,
@@ -211,25 +247,28 @@ do
 	var float d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
     var Vector2D pos_end = val Vector2D(pos_ini.x + (_cos(d) * mag),
 	                                    pos_ini.y - (_sin(d) * mag));
-    par do
-        if pos_end.y >= WIN_H then
 
-        else/if mag > 5 then
-			await 20ms;
+    watching 150ms do
+        par do
+            if pos_end.y >= WIN_H then
+                if not fork then
+                    await Explosion((pos_ini.x + pos_end.x)/2);
+                end
+            else/if mag > 5 then
+                await 20ms;
 
-            var int m = mag;
-            if fork then
-                m = (mag * 0.9) as int;
+                var int m = mag;
+                if fork then
+                    m = (mag * 0.9) as int;
+                end
+                spawn Light(&lights, pos_end, dir, m, fork) in lights;
+
+                if (_rand()%WIN_H) > pos_ini.y then
+                    spawn Light(&lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
+                        in lights;
+                end
             end
-            spawn Light(&lights, pos_end, dir, m, fork) in lights;
-
-			if (_rand()%WIN_H) > pos_ini.y then
-                spawn Light(&lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
-                    in lights;
-            end
-        end
-    with
-        watching 1s do
+        with
             every SDL_REDRAW do
                 _SDL_SetRenderDrawColor(outer.ren, 0xEA, 0xD7, 0xFF, 0 );
                 _SDL_RenderDrawLine(outer.ren,

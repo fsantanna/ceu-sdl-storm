@@ -185,15 +185,58 @@ do
     end
 end
 
-code/await Light (pool&[] Light lights, var Vector2D pos) => void;
-
-code/await Light (pool&[] Light lights, var Vector2D pos) => void
+code/await Light (pool&[] Light    lights,
+                  var     Vector2D pos_ini,
+                  var     int?     direction,
+                  var     int?     magnitude,
+                  var     bool?    is_fork,
+                 ) => void
 do
-    watching 1s do
-		every SDL_REDRAW do
-		    _SDL_SetRenderDrawColor(outer.ren, 0xEA, 0xD7, 0xFF, 0 );
-		    _SDL_RenderDrawLine(outer.ren, pos.x, pos.y, 300, 300);
-		end
+    var int dir = 270;
+    if direction? then
+        dir = direction!;
+    end
+
+    var int mag = 50;
+    if magnitude? then
+        mag = magnitude!;
+    end
+
+    var bool fork = false;
+    if is_fork? then
+        fork = is_fork!;
+    end
+
+    var int chaos = 30;
+	var float d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
+    var Vector2D pos_end = val Vector2D(pos_ini.x + (_cos(d) * mag),
+	                                    pos_ini.y - (_sin(d) * mag));
+    par do
+        if pos_end.y >= WIN_H then
+
+        else/if mag > 5 then
+			await 20ms;
+
+            var int m = mag;
+            if fork then
+                m = (mag * 0.9) as int;
+            end
+            spawn Light(&lights, pos_end, dir, m, fork) in lights;
+
+			if (_rand()%WIN_H) > pos_ini.y then
+                spawn Light(&lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
+                    in lights;
+            end
+        end
+    with
+        watching 1s do
+            every SDL_REDRAW do
+                _SDL_SetRenderDrawColor(outer.ren, 0xEA, 0xD7, 0xFF, 0 );
+                _SDL_RenderDrawLine(outer.ren,
+                                    pos_ini.x, pos_ini.y,
+                                    pos_end.x, pos_end.y);
+            end
+        end
     end
 end
 
@@ -242,7 +285,8 @@ do
             var& IPhysics cloud;
             loop (cloud,_) in clouds do
                 spawn Light(&lights,
-                            Vector2D(cloud.x.pos as int, cloud.y.pos as int))
+                            Vector2D(cloud.x.pos as int, cloud.y.pos as int),
+                            _,_,_)
                     in lights;
             end
         end

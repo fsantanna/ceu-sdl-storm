@@ -12,7 +12,9 @@ var& _SDL_Renderer_ptr ren;
 watching SDL_go("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
             => (ren)
 do
+    #include "physics.ceu"
     #include "storm.ceu"
+    #include "car.ceu"
 
     _srand(_time(null));
 

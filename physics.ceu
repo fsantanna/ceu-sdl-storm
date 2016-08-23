@@ -1,26 +1,6 @@
-#define PI 3.14159265
-
-data Vector2D with
-    var int x,y;
-end;
-
-data Axis with
-    var float pos;
-    var int   len;
-    var float vel;
-    var float acc;
-    var float drag;
-end
-
-data IPhysics with
-    var Axis x;
-    var Axis y;
-    var SDL_Color clr;
-end
-
 code/await Physics (var SDL_Rect rct, var SDL_Color clr)
                     => (var& IPhysics physics)
-                        => void
+                        => FOREVER
 do
     var IPhysics phys_ = val IPhysics(
                                 Axis(rct.x, rct.w, 0, 0, 0),
@@ -42,7 +22,7 @@ do
         end
     with
         every SDL_REDRAW do
-            _SDL_SetRenderDrawColor(outer.ren,
+            _SDL_SetRenderDrawColor(&&outer.ren,
                                     phys_.clr.r,
                                     phys_.clr.g,
                                     phys_.clr.b,
@@ -51,7 +31,7 @@ do
                                           phys_.y.pos as int,
                                           phys_.x.len as int,
                                           phys_.y.len as int);
-            _SDL_RenderFillRect(outer.ren, (&&r as _SDL_Rect&&));
+            _SDL_RenderFillRect(&&outer.ren, (&&r as _SDL_Rect&&));
         end
     end
 end

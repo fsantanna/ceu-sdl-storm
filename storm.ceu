@@ -3,31 +3,33 @@
 #define DROPS_DECAY_MS 2000
 #define DROPS_LEN 2
 
-code/await Drop (var& IPhysics cloud) => void
+code/await Drop (var IPhysics&& cloud) => void
 do
-    var SDL_Rect rct = val SDL_Rect((_rand()%cloud.x.len + cloud.x.pos) as int,
-                                    (cloud.y.pos + cloud.y.len) as int,
+    var SDL_Rect rct = val SDL_Rect((_rand()%cloud:x.len + cloud:x.pos) as int,
+                                    (cloud:y.pos + cloud:y.len) as int,
                                     DROPS_LEN,
                                     5);
+    var float vx = cloud:x.vel;
+
     var& IPhysics drop;
     spawn Physics(rct, SDL_Color(0x98, 0xC1, 0xE4, 0))
             => (drop);
-    drop.x.vel  = cloud.x.vel;
+    drop.x.vel  = vx;
     drop.x.drag = 0.98;
     drop.y.drag = 0.98;
     drop.y.acc  = 500;
 
     event void decay;
     par/or do
-        loop do
-            var int dt = await SDL_DT;
+        var int dt;
+        every dt in SDL_DT do
             if drop.y.pos > WIN_H-DROPS_LEN then
                 drop.y.pos = WIN_H-DROPS_LEN;
                 drop.y.vel = -(drop.y.vel*2/3);
                 emit decay;
             end
-            if (drop.x.pos > WIN_W) or (drop.y.pos < 0) or (drop.x.pos < 0) then
-                escape;
+            if (drop.x.pos > WIN_W) or (drop.x.pos < 0) or (drop.y.pos < 0) then
+                break;
             end
 
             var int abs_vx = _abs(drop.x.vel);
@@ -56,7 +58,7 @@ end
 
 code/await Cloud (pool&[] Drop drops, var int dps)
                     => (var& IPhysics cloud, var& int dps_out)
-                        => void
+                        => FOREVER
 do
     dps_out = &dps;
 
@@ -91,7 +93,7 @@ do
         end
     with
         every (freq_cur)ms do
-            spawn Drop(&cloud_) in drops;
+            spawn Drop(&&cloud_) in drops;
         end
     with
         every 50ms do

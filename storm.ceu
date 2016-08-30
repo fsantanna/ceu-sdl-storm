@@ -58,10 +58,13 @@ end
 pool[] Drop  drops;
 
 code/await Cloud (var int dps)
-                    => (var& IPhysics cloud, var& int dps_out)
+                    => (var& IPhysics cloud, var& int dps_out, event& void go_blink)
                         => FOREVER
 do
     dps_out = &dps;
+
+    event void go_blink_;
+    go_blink = &go_blink_;
 
     var int maxy = 2 * 1000 / DROPS_PERSEC_MIN;
 
@@ -96,6 +99,14 @@ do
         every (freq_cur)ms do
             spawn Drop(&&cloud_) in outer.drops;
         end
+    with
+		loop do
+			await go_blink_;
+			var SDL_Color old = cloud_.clr;
+			cloud_.clr = val SDL_Color(0xFF, 0xFF, 0xFF, 0);
+			await 100ms;
+            cloud_.clr = old;
+		end
     with
         every 50ms do
             freq_ini = 1000 / dps;
@@ -236,7 +247,7 @@ do
 
     every (_rand()%10 + 1)s do
         var& int dps_cloud;
-        loop (_,dps_cloud) in outer.clouds do
+        loop (_,dps_cloud,_) in outer.clouds do
             if _rand()%3 == 0 then
                 continue;
             end

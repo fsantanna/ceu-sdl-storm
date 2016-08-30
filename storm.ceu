@@ -123,7 +123,7 @@ do
     end
 end
 
-code/await Explosion (var int x) => void
+code/await Boom (var int x) => void
 do
     var int radius = 80;
     var SDL_Rect rct = val SDL_Rect(x - radius,
@@ -131,7 +131,6 @@ do
                                     radius*2,
                                     radius*2);
 
-    // explode 40w/s
     //_Mix_PlayChannel(-1, outer.snd_explosion, 0);
     watching 100ms do
         every SDL_REDRAW do
@@ -159,7 +158,8 @@ do
 
 end
 
-code/await Light (pool&[] Light    lights,
+code/await Light (pool&[] Boom     booms,
+                  pool&[] Light    lights,
                   var     Vector2D pos_ini,
                   var     int?     direction,
                   var     int?     magnitude,
@@ -190,22 +190,23 @@ do
         par do
             if pos_end.y >= WIN_H then
                 if not fork then
-                    await Explosion((pos_ini.x + pos_end.x)/2);
+                    spawn Boom((pos_ini.x + pos_end.x)/2) in booms;
                 end
             else/if mag > 5 then
                 await 20ms;
 
                 var int m = mag;
                 if fork then
-                    m = (mag * 0.9) as int;
+                    m = (mag * 0.75) as int;
                 end
-                spawn Light(&lights, pos_end, dir, m, fork) in lights;
+                spawn Light(&booms, &lights, pos_end, dir, m, fork) in lights;
 
                 if (_rand()%WIN_H) > pos_ini.y then
-                    spawn Light(&lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
+                    spawn Light(&booms, &lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
                         in lights;
                 end
             end
+            await FOREVER;
         with
             every SDL_REDRAW do
                 _SDL_SetRenderDrawColor(&&outer.ren, 0xEA, 0xD7, 0xFF, 0 );
@@ -222,6 +223,7 @@ do
     pool[] Drop  drops;
     pool[] Cloud clouds;
     pool[] Light lights;
+    pool[] Boom  booms;
 
     var int dps_cur = 0;
 
@@ -231,7 +233,6 @@ do
         if dps_cur > DROPS_PERSEC_MAX then
             dps_cur = DROPS_PERSEC_MAX;
         end
-
         spawn Cloud(&drops, dps) in clouds;
     end
 
@@ -260,16 +261,15 @@ do
         end
     with
         every (_rand()%3)s do
-            var& IPhysics cloud1, cloud2;
+            var& IPhysics cloud1;//, cloud2;
             loop (cloud1,_) in clouds do
-                loop (cloud2,_) in clouds do
-#if 0
-                    spawn Light(&lights,
-                                Vector2D(cloud1.x.pos as int, cloud2.y.pos as int),
+                //loop (cloud2,_) in clouds do
+                    spawn Light(&booms, &lights,
+                                Vector2D(cloud1.x.pos as int, cloud1.y.pos as int),
                                 _,_,_)
                         in lights;
-#endif
-                end
+                    break;
+                //end
             end
         end
     end

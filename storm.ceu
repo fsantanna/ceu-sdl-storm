@@ -55,8 +55,9 @@ do
         await (DROPS_DECAY_MS)ms;
     end
 end
+pool[] Drop  drops;
 
-code/await Cloud (pool&[] Drop drops, var int dps)
+code/await Cloud (var int dps)
                     => (var& IPhysics cloud, var& int dps_out)
                         => FOREVER
 do
@@ -93,7 +94,7 @@ do
         end
     with
         every (freq_cur)ms do
-            spawn Drop(&&cloud_) in drops;
+            spawn Drop(&&cloud_) in outer.drops;
         end
     with
         every 50ms do
@@ -122,6 +123,7 @@ do
         end
     end
 end
+pool[] Cloud clouds;
 
 code/await Boom (var int x) => void
 do
@@ -157,9 +159,9 @@ do
     end
 
 end
+pool[] Boom  booms;
 
-code/await Light (pool&[] Boom     booms,
-                  pool&[] Light    lights,
+code/await Light (pool&[] Light    lights,
                   var     Vector2D pos_ini,
                   var     int?     direction,
                   var     int?     magnitude,
@@ -190,7 +192,7 @@ do
         par do
             if pos_end.y >= WIN_H then
                 if not fork then
-                    spawn Boom((pos_ini.x + pos_end.x)/2) in booms;
+                    spawn Boom((pos_ini.x + pos_end.x)/2) in outer.booms;
                 end
             else/if mag > 5 then
                 await 20ms;
@@ -199,10 +201,10 @@ do
                 if fork then
                     m = (mag * 0.75) as int;
                 end
-                spawn Light(&booms, &lights, pos_end, dir, m, fork) in lights;
+                spawn Light(&lights, pos_end, dir, m, fork) in lights;
 
                 if (_rand()%WIN_H) > pos_ini.y then
-                    spawn Light(&booms, &lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
+                    spawn Light(&lights, pos_ini, _rand()%180+180, (mag*0.5) as int, true)
                         in lights;
                 end
             end
@@ -217,14 +219,10 @@ do
         end
     end
 end
+pool[] Light lights;
 
 code/await Storm (void) => void
 do
-    pool[] Drop  drops;
-    pool[] Cloud clouds;
-    pool[] Light lights;
-    pool[] Boom  booms;
-
     var int dps_cur = 0;
 
     loop i in [0 -> 3[ do
@@ -233,13 +231,13 @@ do
         if dps_cur > DROPS_PERSEC_MAX then
             dps_cur = DROPS_PERSEC_MAX;
         end
-        spawn Cloud(&drops, dps) in clouds;
+        spawn Cloud(dps) in outer.clouds;
     end
 
     par do
         every (_rand()%10 + 1)s do
             var& int dps_cloud;
-            loop (_,dps_cloud) in clouds do
+            loop (_,dps_cloud) in outer.clouds do
                 if _rand()%3 == 0 then
                     continue;
                 end
@@ -262,12 +260,11 @@ do
     with
         every (_rand()%3)s do
             var& IPhysics cloud1;//, cloud2;
-            loop (cloud1,_) in clouds do
-                //loop (cloud2,_) in clouds do
-                    spawn Light(&booms, &lights,
-                                Vector2D(cloud1.x.pos as int, cloud1.y.pos as int),
+            loop (cloud1,_) in outer.clouds do
+                //loop (cloud2,_) in outer.clouds do
+                    spawn Light(&outer.lights, Vector2D(cloud1.x.pos as int, cloud1.y.pos as int),
                                 _,_,_)
-                        in lights;
+                        in outer.lights;
                     break;
                 //end
             end

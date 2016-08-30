@@ -257,18 +257,3 @@ do
         _printf("\nGotas por Segundo atual: %d/%d\n",dps_cur,DROPS_PERSEC_MAX);
     end
 end
-
-code/await Collisions (void) => FOREVER
-do
-        every (_rand()%3)s do
-            var& IPhysics cloud1;//, cloud2;
-            loop (cloud1,_) in outer.clouds do
-                //loop (cloud2,_) in outer.clouds do
-                    spawn Light(&outer.lights, Vector2D(cloud1.x.pos as int, cloud1.y.pos as int),
-                                _,_,_)
-                        in outer.lights;
-                    break;
-                //end
-            end
-        end
-end

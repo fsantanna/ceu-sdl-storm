@@ -35,6 +35,7 @@ do
     #include "physics.ceu"
     #include "car.ceu"
     #include "storm.ceu"
+    #include "collisions.ceu"
 
     _srand(_time(null));
 

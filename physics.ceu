@@ -10,7 +10,7 @@ do
     physics = &phys_;
 
     par do
-        var int dt_ = _;
+        var int dt_;
         every dt_ in SDL_DT do
             var float dt = (dt_ as float)/1000;
             phys_.x.vel = (phys_.x.vel + phys_.x.acc*dt)
@@ -34,4 +34,12 @@ do
             _SDL_RenderFillRect(&&outer.ren, (&&r as _SDL_Rect&&));
         end
     end
+end
+
+code/tight Intersects (var& IPhysics phy1, var& IPhysics phy2) => bool
+do
+    escape phy1.x.pos+phy1.x.len/2 >= phy2.x.pos-phy2.x.len/2 and
+           phy1.x.pos-phy1.x.len/2 <= phy2.x.pos+phy2.x.len/2 and
+           phy1.y.pos+phy1.y.len/2 >= phy2.y.pos-phy2.y.len/2 and
+           phy1.y.pos-phy1.y.len/2 <= phy2.y.pos+phy2.y.len/2;
 end

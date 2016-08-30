@@ -1,0 +1,41 @@
+var   bool ok_light = true;
+event void go_light;
+spawn do
+    loop do
+        await go_light;
+        ok_light = false;
+        await (_rand()%3)s;
+        ok_light = true;
+    end
+end
+
+//code/await Collides (var IPhysics.Cloud&& cloud1, var IPhysics.Cloud&& cloud2)
+code/await Collides (var IPhysics&& cloud1, var IPhysics&& cloud2)
+                        => void
+do
+    if outer.ok_light then
+        var Vector2D pos =
+            val Vector2D(((cloud1:x.pos + cloud2:x.pos + cloud2:x.len)/2) as int,
+                         ((cloud1:y.pos + cloud1:y.len + cloud2:y.pos + cloud2:y.len)/2) as int);
+
+        spawn Light(&outer.lights, pos, _,_,_) in outer.lights;
+        emit outer.go_light;
+    end
+end
+
+code/await Collisions (void) => FOREVER
+do
+    every (_rand()%3)s do
+        var& IPhysics cloud1;
+        loop (cloud1,_) in outer.clouds do
+            var& IPhysics cloud2;
+            loop (cloud2,_) in outer.clouds do
+                if (&&cloud1 as usize) > (&&cloud2 as usize)
+                    and (call Intersects(&cloud1, &cloud2))
+                then
+                    spawn Collides(&&cloud1, &&cloud2);
+                end
+            end
+        end
+    end
+end

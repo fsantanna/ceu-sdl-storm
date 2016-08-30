@@ -5,7 +5,7 @@ do
     var float pos = 0;
 
     par do
-        var int dt = _;
+        var int dt;
         every dt in SDL_DT do
             var int s = do
                 if car.x.vel >= 0 then

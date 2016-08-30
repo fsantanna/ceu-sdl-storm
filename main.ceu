@@ -38,8 +38,10 @@ do
 
     _srand(_time(null));
 
-    spawn Car();
-    spawn Storm();
+    var& IPhysics car;
+    spawn Car() => (car);
+    spawn Clouds();
+    spawn Collisions();
 
     await FOREVER;
 end

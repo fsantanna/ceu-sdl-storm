@@ -34,32 +34,33 @@ do
     end
 end
 
-code/await Car (void) => FOREVER
+code/await Car (void) => (var& IPhysics car) => FOREVER
 do
-    var& IPhysics car;
+    var& IPhysics car_;
     spawn Physics(SDL_Rect(320,430, 60,30), SDL_Color(0x3B,0xBC,0x48,0))
-            => (car);
-    spawn Wheel(&car, Vector2D(        0, car.y.len));
-    spawn Wheel(&car, Vector2D(car.x.len, car.y.len));
+            => (car_);
+    car = &car_;
+    spawn Wheel(&car_, Vector2D(        0, car_.y.len));
+    spawn Wheel(&car_, Vector2D(car_.x.len, car_.y.len));
 
-    car.x.drag = 0.95;
-    car.y.drag = 0.95;
+    car_.x.drag = 0.95;
+    car_.y.drag = 0.95;
 
     par do
         loop do
             var _SDL_KeyboardEvent&& key;
             key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_LEFT;
-            car.x.acc = -400;
+            car_.x.acc = -400;
             key = await SDL_KEYUP   until key:keysym.sym==_SDLK_LEFT;
-            car.x.acc = 0;
+            car_.x.acc = 0;
         end
     with
         loop do
             var _SDL_KeyboardEvent&& key;
             key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_RIGHT;
-            car.x.acc = 400;
+            car_.x.acc = 400;
             key = await SDL_KEYUP   until key:keysym.sym==_SDLK_RIGHT;
-            car.x.acc = 0;
+            car_.x.acc = 0;
         end
     end
 end

@@ -221,7 +221,7 @@ do
 end
 pool[] Light lights;
 
-code/await Storm (void) => void
+code/await Clouds (void) => void
 do
     var int dps_cur = 0;
 
@@ -234,30 +234,32 @@ do
         spawn Cloud(dps) in outer.clouds;
     end
 
-    par do
-        every (_rand()%10 + 1)s do
-            var& int dps_cloud;
-            loop (_,dps_cloud) in outer.clouds do
-                if _rand()%3 == 0 then
-                    continue;
-                end
-
-                dps_cur = dps_cur - dps_cloud;
-                if dps_cur < DROPS_PERSEC_MIN then
-                    dps_cur = DROPS_PERSEC_MIN;
-                end
-
-                var int dps = _rand()%(DROPS_PERSEC_MAX+1-dps_cur) + DROPS_PERSEC_MIN;
-                dps_cur = dps_cur + dps;
-                if dps_cur > DROPS_PERSEC_MAX then
-                    dps_cur = DROPS_PERSEC_MAX;
-                end
-
-                dps_cloud = dps;
+    every (_rand()%10 + 1)s do
+        var& int dps_cloud;
+        loop (_,dps_cloud) in outer.clouds do
+            if _rand()%3 == 0 then
+                continue;
             end
-            _printf("\nGotas por Segundo atual: %d/%d\n",dps_cur,DROPS_PERSEC_MAX);
+
+            dps_cur = dps_cur - dps_cloud;
+            if dps_cur < DROPS_PERSEC_MIN then
+                dps_cur = DROPS_PERSEC_MIN;
+            end
+
+            var int dps = _rand()%(DROPS_PERSEC_MAX+1-dps_cur) + DROPS_PERSEC_MIN;
+            dps_cur = dps_cur + dps;
+            if dps_cur > DROPS_PERSEC_MAX then
+                dps_cur = DROPS_PERSEC_MAX;
+            end
+
+            dps_cloud = dps;
         end
-    with
+        _printf("\nGotas por Segundo atual: %d/%d\n",dps_cur,DROPS_PERSEC_MAX);
+    end
+end
+
+code/await Collisions (void) => FOREVER
+do
         every (_rand()%3)s do
             var& IPhysics cloud1;//, cloud2;
             loop (cloud1,_) in outer.clouds do
@@ -269,5 +271,4 @@ do
                 //end
             end
         end
-    end
 end

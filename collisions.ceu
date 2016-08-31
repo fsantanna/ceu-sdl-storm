@@ -25,12 +25,14 @@ do
             end
         end
     with
-        // drop vs drop
+        // drop vs *
         var int dt;
         every dt in SDL_DT do
             var& IPhysics drop1;
             var& bool     collided1;
             loop (drop1,collided1) in outer.drops do
+
+                // drop vs drop
                 var& IPhysics drop2;
                 var& bool     collided2;
                 loop (drop2,collided2) in outer.drops do
@@ -43,6 +45,16 @@ do
                         if collided2 then
                             drop2.x.vel = -50;
                         end
+                    end
+                end
+
+                // drop vs boom
+                var& IPhysics boom;
+                loop (boom) in outer.booms do
+                    if (call Intersects(&drop1, &boom)) then
+                        var Vector2D vel = call Boom_Vel(&boom, &drop1);
+                        drop1.x.vel = drop1.x.vel + (vel.x*dt);
+                        drop1.y.vel = drop1.y.vel + (vel.y*dt);
                     end
                 end
             end

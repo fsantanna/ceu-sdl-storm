@@ -32,7 +32,7 @@ do
             if drop_.y.pos > WIN_H-DROPS_LEN then
                 drop_.y.pos = WIN_H-DROPS_LEN;
                 drop_.y.vel = -(drop_.y.vel*2/3);
-				has_collided_ = true;
+                has_collided_ = true;
                 emit decay;
             end
             if (drop_.x.pos > WIN_W) or (drop_.x.pos < 0) or (drop_.y.pos < 0) then
@@ -107,13 +107,13 @@ do
             spawn Drop(&&cloud_) in outer.drops;
         end
     with
-		loop do
-			await go_blink_;
-			var SDL_Color old = cloud_.clr;
-			cloud_.clr = val SDL_Color(0xFF, 0xFF, 0xFF, 0);
-			await 100ms;
+        loop do
+            await go_blink_;
+            var SDL_Color old = cloud_.clr;
+            cloud_.clr = val SDL_Color(0xFF, 0xFF, 0xFF, 0);
+            await 100ms;
             cloud_.clr = old;
-		end
+        end
     with
         every 50ms do
             freq_ini = 1000 / dps;
@@ -143,13 +143,49 @@ do
 end
 pool[] Cloud clouds;
 
-code/await Boom (var int x) => void
+code/tight Boom_Vel (var& IPhysics boom, var& IPhysics other) => Vector2D
+do
+    var int raio = 30;
+    var int magnitude = 200;
+
+    var Vector2D c1 = val Vector2D(((boom.x.pos+boom.x.pos+boom.x.len)/2) as int,
+                                   ((boom.y.pos+boom.y.pos+boom.y.len)/2) as int);
+    var Vector2D c2 = val Vector2D(((other.x.pos+other.x.pos+other.x.len)/2) as int,
+                                   ((other.y.pos+other.y.pos+other.y.len)/2) as int);
+
+    if c2.x < c1.x then
+        boom.x.vel = -boom.x.vel;
+    end
+    if c2.y < c1.y then
+        boom.y.vel = -boom.y.vel;
+    end
+
+    var float dist = _sqrt(_pow(c2.x-c1.x,2) + _pow(c2.y-c1.y, 2));
+    var float pct = dist/raio;
+
+    if pct > 1 then
+        var Vector2D vel = val Vector2D(0,0);
+        escape vel;
+    else/if pct < 0.1 then
+        pct = 0.1;
+    end
+
+    pct = 1.0 - (_cos(pct * PI));
+    var Vector2D vel = val Vector2D(_cos(pct)*magnitude, _sin(pct)*magnitude*-1);
+    escape vel;
+end
+
+code/await Boom (var int x) => (var& IPhysics boom) => void
 do
     var int radius = 80;
     var SDL_Rect rct = val SDL_Rect(x - radius,
                                     (WIN_H + radius*0.2 - radius) as int,
                                     radius*2,
                                     radius*2);
+
+    var& IPhysics boom_;
+    spawn Physics(rct,_) => (boom_);
+    boom = &boom_;
 
     //_Mix_PlayChannel(-1, outer.snd_explosion, 0);
     watching 100ms do
@@ -202,9 +238,9 @@ do
     end
 
     var int chaos = 30;
-	var float d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
+    var float d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
     var Vector2D pos_end = val Vector2D(pos_ini.x + (_cos(d) * mag),
-	                                    pos_ini.y - (_sin(d) * mag));
+                                        pos_ini.y - (_sin(d) * mag));
 
     watching 150ms do
         par do

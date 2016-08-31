@@ -23,8 +23,8 @@ data Axis with
 end
 
 data IPhysics with
-    var Axis x;
-    var Axis y;
+    var Axis      x;
+    var Axis      y;
     var SDL_Color clr;
 end
 
@@ -44,7 +44,12 @@ do
     spawn Clouds();
     spawn Collisions();
 
-    await FOREVER;
+    // DEBUG
+    loop do
+        var _SDL_KeyboardEvent&& key =
+            await SDL_KEYDOWN until key:keysym.sym==_SDLK_DOWN;
+        spawn Light(&lights,Vector2D(300,0),_,_,_) in lights;
+    end
 end
 
 escape 0;

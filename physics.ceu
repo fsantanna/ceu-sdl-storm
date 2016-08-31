@@ -1,4 +1,18 @@
-code/await Physics (var SDL_Rect rct, var SDL_Color clr)
+data Axis with
+    var float pos;
+    var int   len;
+    var float vel;
+    var float acc;
+    var float drag;
+end
+
+data IPhysics with
+    var Axis       x;
+    var Axis       y;
+    var SDL_Color? clr;
+end
+
+code/await Physics (var SDL_Rect rct, var SDL_Color? clr)
                     => (var& IPhysics physics)
                         => FOREVER
 do
@@ -22,11 +36,14 @@ do
         end
     with
         every SDL_REDRAW do
+            if not phys_.clr? then
+                continue;
+            end
             _SDL_SetRenderDrawColor(&&outer.ren,
-                                    phys_.clr.r,
-                                    phys_.clr.g,
-                                    phys_.clr.b,
-                                    phys_.clr.a);
+                                    phys_.clr!.r,
+                                    phys_.clr!.g,
+                                    phys_.clr!.b,
+                                    phys_.clr!.a);
             var SDL_Rect r = val SDL_Rect(phys_.x.pos as int,
                                           phys_.y.pos as int,
                                           phys_.x.len as int,
@@ -38,8 +55,8 @@ end
 
 code/tight Intersects (var& IPhysics phy1, var& IPhysics phy2) => bool
 do
-    escape phy1.x.pos+phy1.x.len/2 >= phy2.x.pos-phy2.x.len/2 and
-           phy1.x.pos-phy1.x.len/2 <= phy2.x.pos+phy2.x.len/2 and
-           phy1.y.pos+phy1.y.len/2 >= phy2.y.pos-phy2.y.len/2 and
-           phy1.y.pos-phy1.y.len/2 <= phy2.y.pos+phy2.y.len/2;
+    escape not (phy1.x.pos+phy1.x.len < phy2.x.pos or
+                phy1.y.pos+phy1.y.len < phy2.y.pos or
+                phy2.x.pos+phy2.x.len < phy1.x.pos or
+                phy2.y.pos+phy2.y.len < phy1.y.pos);
 end

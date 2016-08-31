@@ -9,24 +9,11 @@ end
 #define WIN_H 480
 
 #define PI 3.14159265
+_srand(_time(null));
 
 data Vector2D with
     var int x,y;
 end;
-
-data Axis with
-    var float pos;
-    var int   len;
-    var float vel;
-    var float acc;
-    var float drag;
-end
-
-data IPhysics with
-    var Axis      x;
-    var Axis      y;
-    var SDL_Color clr;
-end
 
 var& _SDL_Renderer ren;
 watching SDL_go("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
@@ -34,22 +21,17 @@ watching SDL_go("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
 do
     #include "physics.ceu"
     #include "car.ceu"
-    #include "storm.ceu"
-    #include "collisions.ceu"
-
-    _srand(_time(null));
+    #include "light.ceu"
+    #include "clouds.ceu"
 
     var& IPhysics car;
     spawn Car() => (car);
     spawn Clouds();
+
+    #include "collisions.ceu"
     spawn Collisions();
 
-    // DEBUG
-    loop do
-        var _SDL_KeyboardEvent&& key =
-            await SDL_KEYDOWN until key:keysym.sym==_SDLK_DOWN;
-        spawn Light(&lights,Vector2D(300,0),_,_,_) in lights;
-    end
+    await FOREVER;
 end
 
 escape 0;

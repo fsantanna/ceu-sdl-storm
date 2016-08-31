@@ -1,24 +1,49 @@
 code/await Collisions (void) => FOREVER
 do
-    // cloud vs cloud
-    every (_rand()%3)s do
-        var&   IPhysics cloud1;
-        event& void     blink1;
-        loop (cloud1,_,blink1) in outer.clouds do
-            var&   IPhysics cloud2;
-            event& void     blink2;
-            loop (cloud2,_,blink2) in outer.clouds do
-                if (&&cloud1 as usize) < (&&cloud2 as usize)
-                    and (call Intersects(&cloud1, &cloud2))
-                then
-                    emit blink1;
-                    emit blink2;
-                    var Vector2D pos =
-                        val Vector2D(
-                            ((cloud1.x.pos + cloud2.x.pos + cloud2.x.len)/2) as int,
-                            ((cloud1.y.pos + cloud1.y.len + cloud2.y.pos + cloud2.y.len)/2) as int,
-                        );
-                    spawn Light(&outer.lights,pos,_,_,_) in outer.lights;
+    par do
+        // cloud vs cloud
+        every (_rand()%3)s do
+            var&   IPhysics cloud1;
+            event& void     blink1;
+            loop (cloud1,_,blink1) in outer.clouds do
+                var&   IPhysics cloud2;
+                event& void     blink2;
+                loop (cloud2,_,blink2) in outer.clouds do
+                    if (&&cloud1 as usize) < (&&cloud2 as usize)
+                        and (call Intersects(&cloud1, &cloud2))
+                    then
+                        emit blink1;
+                        emit blink2;
+                        var Vector2D pos =
+                            val Vector2D(
+                                ((cloud1.x.pos + cloud2.x.pos + cloud2.x.len)/2) as int,
+                                ((cloud1.y.pos + cloud1.y.len + cloud2.y.pos + cloud2.y.len)/2) as int,
+                            );
+                        spawn Light(&outer.lights,pos,_,_,_) in outer.lights;
+                    end
+                end
+            end
+        end
+    with
+        // drop vs drop
+        var int dt;
+        every dt in SDL_DT do
+            var& IPhysics drop1;
+            var& int      cols1;
+            loop (drop1,cols1) in outer.drops do
+                var& IPhysics drop2;
+                var& int      cols2;
+                loop (drop2,cols2) in outer.drops do
+                    if (&&drop1 as usize) < (&&drop2 as usize)
+                        and (call Intersects(&drop1, &drop2))
+                    then
+                        if cols1 > 0 then
+                            drop1.x.vel = +50;
+                        end
+                        if cols2 > 0 then
+                            drop2.x.vel = -50;
+                        end
+                    end
                 end
             end
         end

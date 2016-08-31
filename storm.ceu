@@ -3,51 +3,58 @@
 #define DROPS_DECAY_MS 2000
 #define DROPS_LEN 2
 
-code/await Drop (var IPhysics&& cloud) => void
+code/await Drop (var IPhysics&& cloud)
+                    => (var& IPhysics drop, var& int collisions_n)
+                        => void
 do
+    var int collisions_n_ = 0;
+    collisions_n = &collisions_n_;
+
     var SDL_Rect rct = val SDL_Rect((_rand()%cloud:x.len + cloud:x.pos) as int,
                                     (cloud:y.pos + cloud:y.len) as int,
                                     DROPS_LEN,
                                     5);
     var float vx = cloud:x.vel;
 
-    var& IPhysics drop;
+    var& IPhysics drop_;
     spawn Physics(rct, SDL_Color(0x98, 0xC1, 0xE4, 0))
-            => (drop);
-    drop.x.vel  = vx;
-    drop.x.drag = 0.98;
-    drop.y.drag = 0.98;
-    drop.y.acc  = 500;
+            => (drop_);
+    drop = &drop_;
+    drop_.x.vel  = vx;
+    drop_.x.drag = 0.98;
+    drop_.y.drag = 0.98;
+    drop_.y.acc  = 500;
 
     event void decay;
     par/or do
         var int dt;
         every dt in SDL_DT do
-            if drop.y.pos > WIN_H-DROPS_LEN then
-                drop.y.pos = WIN_H-DROPS_LEN;
-                drop.y.vel = -(drop.y.vel*2/3);
+            if drop_.y.pos > WIN_H-DROPS_LEN then
+                drop_.y.pos = WIN_H-DROPS_LEN;
+                drop_.y.vel = -(drop_.y.vel*2/3);
+				collisions_n_ = collisions_n_ + 1;
                 emit decay;
             end
-            if (drop.x.pos > WIN_W) or (drop.x.pos < 0) or (drop.y.pos < 0) then
+            if (drop_.x.pos > WIN_W) or (drop_.x.pos < 0) or (drop_.y.pos < 0) then
                 break;
             end
 
-            var int abs_vx = _abs(drop.x.vel);
-            var int abs_vy = _abs(drop.y.vel);
+            var int abs_vx = _abs(drop_.x.vel);
+            var int abs_vy = _abs(drop_.y.vel);
             if abs_vx > abs_vy then
-                drop.x.len = DROPS_LEN * (1 + (abs_vx-abs_vy)/100);
-                drop.y.len = DROPS_LEN;
+                drop_.x.len = DROPS_LEN * (1 + (abs_vx-abs_vy)/100);
+                drop_.y.len = DROPS_LEN;
             else
-                drop.x.len = DROPS_LEN;
-                drop.y.len = DROPS_LEN * (1 + (abs_vy-abs_vx)/100);
+                drop_.x.len = DROPS_LEN;
+                drop_.y.len = DROPS_LEN * (1 + (abs_vy-abs_vx)/100);
             end
 
             var int tmax = DROPS_LEN * 4;
-            if drop.x.len > tmax then
-                drop.x.len = tmax;
+            if drop_.x.len > tmax then
+                drop_.x.len = tmax;
             end
-            if drop.y.len > tmax then
-                drop.y.len = tmax;
+            if drop_.y.len > tmax then
+                drop_.y.len = tmax;
             end
         end
     with

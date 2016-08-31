@@ -29,18 +29,18 @@ do
         var int dt;
         every dt in SDL_DT do
             var& IPhysics drop1;
-            var& int      cols1;
-            loop (drop1,cols1) in outer.drops do
+            var& bool     collided1;
+            loop (drop1,collided1) in outer.drops do
                 var& IPhysics drop2;
-                var& int      cols2;
-                loop (drop2,cols2) in outer.drops do
+                var& bool     collided2;
+                loop (drop2,collided2) in outer.drops do
                     if (&&drop1 as usize) < (&&drop2 as usize)
                         and (call Intersects(&drop1, &drop2))
                     then
-                        if cols1 > 0 then
+                        if collided1 then
                             drop1.x.vel = +50;
                         end
-                        if cols2 > 0 then
+                        if collided2 then
                             drop2.x.vel = -50;
                         end
                     end

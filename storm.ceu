@@ -4,11 +4,11 @@
 #define DROPS_LEN 2
 
 code/await Drop (var IPhysics&& cloud)
-                    => (var& IPhysics drop, var& int collisions_n)
+                    => (var& IPhysics drop, var& bool has_collided)
                         => void
 do
-    var int collisions_n_ = 0;
-    collisions_n = &collisions_n_;
+    var bool has_collided_ = false;
+    has_collided = &has_collided_;
 
     var SDL_Rect rct = val SDL_Rect((_rand()%cloud:x.len + cloud:x.pos) as int,
                                     (cloud:y.pos + cloud:y.len) as int,
@@ -32,7 +32,7 @@ do
             if drop_.y.pos > WIN_H-DROPS_LEN then
                 drop_.y.pos = WIN_H-DROPS_LEN;
                 drop_.y.vel = -(drop_.y.vel*2/3);
-				collisions_n_ = collisions_n_ + 1;
+				has_collided_ = true;
                 emit decay;
             end
             if (drop_.x.pos > WIN_W) or (drop_.x.pos < 0) or (drop_.y.pos < 0) then

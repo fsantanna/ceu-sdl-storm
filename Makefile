@@ -5,7 +5,8 @@ all:
 	ceu --pre --pre-args="-I$(CEU_DIR)/include -I$(CEU_SDL_DIR)/include"    \
 	          --pre-input=main.ceu                                          \
 	    --ceu                                                               \
-	    --env --env-header=/data/ceu/ceu/env/header.h                       \
+	    --env --env-types=/data/ceu/ceu/env/types.h                         \
+	          --env-threads=/data/ceu/ceu/env/threads.h                     \
 	          --env-main=/data/ceu/ceu/env/main.c                           \
 	          --env-output=/tmp/x.c                                         \
 	    --cc --cc-args="-lm -llua5.3 -lpthread -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2_gfx" \

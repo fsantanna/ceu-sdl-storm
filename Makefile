@@ -4,7 +4,7 @@ CEU_SDL_DIR = $(error set absolute path to "<ceu-sdl>" repository)
 all:
 	ceu --pre --pre-args="-I$(CEU_DIR)/include -I$(CEU_SDL_DIR)/include"    \
 	          --pre-input=main.ceu                                          \
-	    --ceu                                                               \
+	    --ceu --ceu-err-unused=pass --ceu-err-uninitialized=pass            \
 	    --env --env-types=/data/ceu/ceu/env/types.h                         \
 	          --env-threads=/data/ceu/ceu/env/threads.h                     \
 	          --env-main=/data/ceu/ceu/env/main.c                           \

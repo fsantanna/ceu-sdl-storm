@@ -1,12 +1,12 @@
-code/tight Boom_Vel (var& IPhysics boom, var& IPhysics other) => Vector2D
+code/tight Boom_Vel (var& IPhysics boom, var& IPhysics other) -> Vector2D
 do
     var int radius    = 80;
     var int magnitude = 20;
 
-    var Vector2D c1 = val Vector2D((boom.x.pos+boom.x.len/2) as int,
-                                   (boom.y.pos+boom.y.len/2) as int);
-    var Vector2D c2 = val Vector2D((other.x.pos+other.x.len/2) as int,
-                                   (other.y.pos+other.y.len/2) as int);
+    var Vector2D c1 = val Vector2D((boom.x.pst+boom.x.len/2) as int,
+                                   (boom.y.pst+boom.y.len/2) as int);
+    var Vector2D c2 = val Vector2D((other.x.pst+other.x.len/2) as int,
+                                   (other.y.pst+other.y.len/2) as int);
 
     var float dist = _sqrt(_pow(c2.x-c1.x,2) + _pow(c2.y-c1.y,2));
 
@@ -30,7 +30,7 @@ do
     escape vel;
 end
 
-code/await Boom (var int x) => (var& IPhysics boom) => void
+code/await Boom (var int x) -> (var& IPhysics boom) -> void
 do
     var int radius = 80;
     var SDL_Rect rct = val SDL_Rect(x - radius,
@@ -38,7 +38,7 @@ do
                                     radius*2,
                                     radius*2);
     var& IPhysics boom_;
-    spawn Physics(rct,_) => (boom_);
+    spawn Physics(rct,_) -> (boom_);
     boom = &boom_;
     await 100ms;
 end
@@ -49,7 +49,7 @@ code/await Light (pool&[] Light    lights,
                   var     int?     direction,
                   var     int?     magnitude,
                   var     bool?    is_fork,
-                 ) => void
+                 ) -> void
 do
     var int dir = 270;
     if direction? then

@@ -1,4 +1,4 @@
-code/await Collisions (void) => FOREVER
+code/await Collisions (void) -> FOREVER
 do
     par do
         // cloud vs cloud
@@ -14,12 +14,12 @@ do
                     then
                         emit blink1;
                         emit blink2;
-                        var Vector2D pos =
+                        var Vector2D pst =
                             val Vector2D(
-                                ((cloud1.x.pos + cloud2.x.pos + cloud2.x.len)/2) as int,
-                                ((cloud1.y.pos + cloud1.y.len + cloud2.y.pos + cloud2.y.len)/2) as int,
+                                ((cloud1.x.pst + cloud2.x.pst + cloud2.x.len)/2) as int,
+                                ((cloud1.y.pst + cloud1.y.len + cloud2.y.pst + cloud2.y.len)/2) as int,
                             );
-                        spawn Light(&outer.lights,pos,_,_,_) in outer.lights;
+                        spawn Light(&outer.lights,pst,_,_,_) in outer.lights;
                     end
                 end
             end
@@ -62,8 +62,8 @@ do
 
                 // drop vs car
                 if (call Intersects(&drop1, &outer.car)) then
-                    if drop1.y.pos < outer.car.y.pos then
-                        drop1.y.pos = outer.car.y.pos - drop1.y.len;
+                    if drop1.y.pst < outer.car.y.pst then
+                        drop1.y.pst = outer.car.y.pst - drop1.y.len;
                         drop1.y.vel = -(drop1.y.vel/3);
                         drop1.x.vel = outer.car.x.vel / 2;
                         collided1 = true;

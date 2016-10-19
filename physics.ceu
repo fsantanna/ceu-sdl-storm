@@ -1,5 +1,5 @@
 data Axis with
-    var float pos;
+    var float pst;
     var int   len;
     var float vel;
     var float acc;
@@ -13,8 +13,8 @@ data IPhysics with
 end
 
 code/await Physics (var SDL_Rect rct, var SDL_Color? clr)
-                    => (var& IPhysics physics)
-                        => FOREVER
+                    -> (var& IPhysics physics)
+                        -> FOREVER
 do
     var IPhysics phys_ = val IPhysics(
                                 Axis(rct.x, rct.w, 0, 0, 0),
@@ -31,8 +31,8 @@ do
                             * (1 - phys_.x.drag*dt);
             phys_.y.vel = (phys_.y.vel + phys_.y.acc*dt)
                             * (1 - phys_.y.drag*dt);
-            phys_.x.pos = phys_.x.pos + phys_.x.vel*dt;
-            phys_.y.pos = phys_.y.pos + phys_.y.vel*dt;
+            phys_.x.pst = phys_.x.pst + phys_.x.vel*dt;
+            phys_.y.pst = phys_.y.pst + phys_.y.vel*dt;
         end
     with
         every SDL_REDRAW do
@@ -44,8 +44,8 @@ do
                                     phys_.clr!.g,
                                     phys_.clr!.b,
                                     phys_.clr!.a);
-            var SDL_Rect r = val SDL_Rect(phys_.x.pos as int,
-                                          phys_.y.pos as int,
+            var SDL_Rect r = val SDL_Rect(phys_.x.pst as int,
+                                          phys_.y.pst as int,
                                           phys_.x.len as int,
                                           phys_.y.len as int);
             _SDL_RenderFillRect(&&outer.ren, (&&r as _SDL_Rect&&));
@@ -53,10 +53,10 @@ do
     end
 end
 
-code/tight Intersects (var& IPhysics phy1, var& IPhysics phy2) => bool
+code/tight Intersects (var& IPhysics phy1, var& IPhysics phy2) -> bool
 do
-    escape not (phy1.x.pos+phy1.x.len < phy2.x.pos or
-                phy1.y.pos+phy1.y.len < phy2.y.pos or
-                phy2.x.pos+phy2.x.len < phy1.x.pos or
-                phy2.y.pos+phy2.y.len < phy1.y.pos);
+    escape not (phy1.x.pst+phy1.x.len < phy2.x.pst or
+                phy1.y.pst+phy1.y.len < phy2.y.pst or
+                phy2.x.pst+phy2.x.len < phy1.x.pst or
+                phy2.y.pst+phy2.y.len < phy1.y.pst);
 end

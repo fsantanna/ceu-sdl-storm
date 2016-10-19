@@ -4,21 +4,21 @@
 #define DROPS_LEN 2
 
 code/await Drop (var IPhysics&& cloud)
-                    => (var& IPhysics drop, var& bool has_collided)
-                        => void
+                    -> (var& IPhysics drop, var& bool has_collided)
+                        -> void
 do
     var bool has_collided_ = false;
     has_collided = &has_collided_;
 
-    var SDL_Rect rct = val SDL_Rect((_rand()%cloud:x.len + cloud:x.pos) as int,
-                                    (cloud:y.pos + cloud:y.len) as int,
+    var SDL_Rect rct = val SDL_Rect((_rand()%cloud:x.len + cloud:x.pst) as int,
+                                    (cloud:y.pst + cloud:y.len) as int,
                                     DROPS_LEN,
                                     5);
     var float vx = cloud:x.vel;
 
     var& IPhysics drop_;
     spawn Physics(rct, SDL_Color(0x98, 0xC1, 0xE4, 0))
-            => (drop_);
+            -> (drop_);
     drop = &drop_;
     drop_.x.vel  = vx;
     drop_.x.drag = 0.98;
@@ -29,13 +29,13 @@ do
     par/or do
         var int dt;
         every dt in SDL_DT do
-            if drop_.y.pos > WIN_H-DROPS_LEN then
-                drop_.y.pos = WIN_H-DROPS_LEN;
+            if drop_.y.pst > WIN_H-DROPS_LEN then
+                drop_.y.pst = WIN_H-DROPS_LEN;
                 drop_.y.vel = -(drop_.y.vel*2/3);
                 has_collided_ = true;
                 emit decay;
             end
-            if (drop_.x.pos > WIN_W) or (drop_.x.pos < 0) or (drop_.y.pos < 0) then
+            if (drop_.x.pst > WIN_W) or (drop_.x.pst < 0) or (drop_.y.pst < 0) then
                 break;
             end
 
@@ -65,8 +65,8 @@ end
 pool[] Drop  drops;
 
 code/await Cloud (var int dps)
-                    => (var& IPhysics cloud, var& int dps_out, event& void go_blink)
-                        => FOREVER
+                    -> (var& IPhysics cloud, var& int dps_out, event& void go_blink)
+                        -> FOREVER
 do
     dps_out = &dps;
 
@@ -91,15 +91,15 @@ do
     var int vx = 10 + _rand()%50;
 
     var& IPhysics cloud_;
-    spawn Physics(rct, clr) => (cloud_);
+    spawn Physics(rct, clr) -> (cloud_);
     cloud = &cloud_;
 
     cloud_.x.vel = vx;
     par do
         var int dt;
         every dt in SDL_DT do
-            if cloud_.x.pos > WIN_W then
-                cloud_.x.pos = -cloud_.x.len;
+            if cloud_.x.pst > WIN_W then
+                cloud_.x.pst = -cloud_.x.len;
             end
         end
     with
@@ -133,7 +133,7 @@ do
             if ty < 1 then
                 ty = 1;
             end
-            cloud_.y.pos = ty;
+            cloud_.y.pst = ty;
             cloud_.clr = val SDL_Color(200-(200*ty/maxy),
                                        ((cloud_.clr!.r as int)*0.95) as u8,
                                        cloud_.clr!.r,
@@ -143,10 +143,11 @@ do
 end
 pool[] Cloud clouds;
 
-code/await Clouds (void) => void
+code/await Clouds (void) -> void
 do
     var int dps_cur = 0;
 
+    var int i;
     loop i in [0 -> 3[ do
         var int dps = (_rand() % (DROPS_PERSEC_MAX+1-dps_cur)) + DROPS_PERSEC_MIN;
         dps_cur = dps_cur + dps;

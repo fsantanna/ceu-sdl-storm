@@ -17,7 +17,7 @@ end;
 
 var& _SDL_Renderer ren;
 watching SDL_go("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
-            => (ren)
+            -> (ren)
 do
     #include "physics.ceu"
     #include "car.ceu"
@@ -25,7 +25,7 @@ do
     #include "clouds.ceu"
 
     var& IPhysics car;
-    spawn Car() => (car);
+    spawn Car() -> (car);
     spawn Clouds();
 
     #include "collisions.ceu"

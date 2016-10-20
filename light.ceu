@@ -38,7 +38,7 @@ do
                                     radius*2,
                                     radius*2);
     var& IPhysics boom_;
-    spawn Physics(rct,_) -> (boom_);
+    spawn Physics(rct,_) -> (&boom_);
     boom = &boom_;
     await 100ms;
 end

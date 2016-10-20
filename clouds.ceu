@@ -18,7 +18,7 @@ do
 
     var& IPhysics drop_;
     spawn Physics(rct, SDL_Color(0x98, 0xC1, 0xE4, 0))
-            -> (drop_);
+            -> (&drop_);
     drop = &drop_;
     drop_.x.vel  = vx;
     drop_.x.drag = 0.98;
@@ -91,7 +91,7 @@ do
     var int vx = 10 + _rand()%50;
 
     var& IPhysics cloud_;
-    spawn Physics(rct, clr) -> (cloud_);
+    spawn Physics(rct, clr) -> (&cloud_);
     cloud = &cloud_;
 
     cloud_.x.vel = vx;

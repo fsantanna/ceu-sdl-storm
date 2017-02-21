@@ -13,42 +13,39 @@ data IPhysics with
 end
 
 code/await Physics (var SDL_Rect rct, var SDL_Color? clr)
-                    -> (var& IPhysics physics)
+                    -> (var IPhysics physics)
                         -> FOREVER
 do
-    var IPhysics phys_ = val IPhysics(
-                                Axis(rct.x, rct.w, 0, 0, 0),
-                                Axis(rct.y, rct.h, 0, 0, 0),
-                                clr,
-                             );
-    physics = &phys_;
+    physics = val IPhysics(Axis(rct.x, rct.w, 0, 0, 0),
+                           Axis(rct.y, rct.h, 0, 0, 0),
+                           clr);
 
     par do
         var int dt_;
         every dt_ in SDL_DT do
             var float dt = (dt_ as float)/1000;
-            phys_.x.vel = (phys_.x.vel + phys_.x.acc*dt)
-                            * (1 - phys_.x.drag*dt);
-            phys_.y.vel = (phys_.y.vel + phys_.y.acc*dt)
-                            * (1 - phys_.y.drag*dt);
-            phys_.x.pst = phys_.x.pst + phys_.x.vel*dt;
-            phys_.y.pst = phys_.y.pst + phys_.y.vel*dt;
+            physics.x.vel = (physics.x.vel + physics.x.acc*dt)
+                                * (1 - physics.x.drag*dt);
+            physics.y.vel = (physics.y.vel + physics.y.acc*dt)
+                                * (1 - physics.y.drag*dt);
+            physics.x.pst = physics.x.pst + physics.x.vel*dt;
+            physics.y.pst = physics.y.pst + physics.y.vel*dt;
         end
     with
         every SDL_REDRAW do
-            if not phys_.clr? then
+            if not physics.clr? then
                 continue;
             end
-            _SDL_SetRenderDrawColor(&&outer.ren,
-                                    phys_.clr!.r,
-                                    phys_.clr!.g,
-                                    phys_.clr!.b,
-                                    phys_.clr!.a);
-            var SDL_Rect r = val SDL_Rect(phys_.x.pst as int,
-                                          phys_.y.pst as int,
-                                          phys_.x.len as int,
-                                          phys_.y.len as int);
-            _SDL_RenderFillRect(&&outer.ren, (&&r as _SDL_Rect&&));
+            _SDL_SetRenderDrawColor(&&outer.sdl!.ren,
+                                    physics.clr!.r,
+                                    physics.clr!.g,
+                                    physics.clr!.b,
+                                    physics.clr!.a);
+            var SDL_Rect r = val SDL_Rect(physics.x.pst as int,
+                                          physics.y.pst as int,
+                                          physics.x.len as int,
+                                          physics.y.len as int);
+            _SDL_RenderFillRect(&&outer.sdl!.ren, (&&r as _SDL_Rect&&));
         end
     end
 end

@@ -3,21 +3,19 @@ do
     par do
         // cloud vs cloud
         every (_rand()%3)s do
-            var&   IPhysics cloud1;
-            event& void     blink1;
-            loop (cloud1,_,blink1) in outer.clouds do
-                var&   IPhysics cloud2;
-                event& void     blink2;
-                loop (cloud2,_,blink2) in outer.clouds do
-                    if (&&cloud1 as usize) < (&&cloud2 as usize)
-                        and (call Intersects(&cloud1, &cloud2))
+            var&? Cloud cloud1;
+            loop cloud1 in outer.clouds do
+                var&? Cloud cloud2;
+                loop cloud2 in outer.clouds do
+                    if (&&cloud1!.physics as usize) < (&&cloud2!.physics as usize)
+                        and (call Intersects(&cloud1!.physics, &cloud2!.physics))
                     then
-                        emit blink1;
-                        emit blink2;
+                        emit cloud1!.go_blink;
+                        emit cloud2!.go_blink;
                         var Vector2D pst =
                             val Vector2D(
-                                ((cloud1.x.pst + cloud2.x.pst + cloud2.x.len)/2) as int,
-                                ((cloud1.y.pst + cloud1.y.len + cloud2.y.pst + cloud2.y.len)/2) as int,
+                                ((cloud1!.physics.x.pst + cloud2!.physics.x.pst + cloud2!.physics.x.len)/2) as int,
+                                ((cloud1!.physics.y.pst + cloud1!.physics.y.len + cloud2!.physics.y.pst + cloud2!.physics.y.len)/2) as int,
                             );
                         spawn Light(&outer.lights,pst,_,_,_) in outer.lights;
                     end
@@ -28,11 +26,11 @@ do
         // car vs boom
         var int dt;
         every dt in SDL_DT do
-            var& IPhysics boom;
-            loop (boom) in outer.booms do
-                if (call Intersects(&boom, &outer.car)) then
-                    var Vector2D vel = call Boom_Vel(&boom, &outer.car);
-                    outer.car.x.vel = outer.car.x.vel + (vel.x*dt/20);
+            var&? Boom boom;
+            loop boom in outer.booms do
+                if (call Intersects(&boom!.physics, &outer.car!.physics)) then
+                    var Vector2D vel = call Boom_Vel(&boom!.physics, &outer.car!.physics);
+                    outer.car!.physics.x.vel = outer.car!.physics.x.vel + (vel.x*dt/20);
                 end
             end
         end
@@ -40,46 +38,44 @@ do
         // drop vs *
         var int dt;
         every dt in SDL_DT do
-            var& IPhysics drop1;
-            var& bool     collided1;
-            loop (drop1,collided1) in outer.drops
+            var&? Drop drop1;
+            loop drop1 in outer.drops
             do
                 // drop vs drop
-                var& IPhysics drop2;
-                var& bool     collided2;
-                loop (drop2,collided2) in outer.drops do
-                    if (&&drop1 as usize) < (&&drop2 as usize)
-                        and (call Intersects(&drop1, &drop2))
+                var&? Drop drop2;
+                loop drop2 in outer.drops do
+                    if (&&drop1!.physics as usize) < (&&drop2!.physics as usize)
+                        and (call Intersects(&drop1!.physics, &drop2!.physics))
                     then
-                        if collided1 then
-                            drop1.x.vel = +50;
+                        if drop1!.has_collided then
+                            drop1!.physics.x.vel = +50;
                         end
-                        if collided2 then
-                            drop2.x.vel = -50;
+                        if drop2!.has_collided then
+                            drop2!.physics.x.vel = -50;
                         end
                     end
                 end
 
                 // drop vs car
-                if (call Intersects(&drop1, &outer.car)) then
-                    if drop1.y.pst < outer.car.y.pst then
-                        drop1.y.pst = outer.car.y.pst - drop1.y.len;
-                        drop1.y.vel = -(drop1.y.vel/3);
-                        drop1.x.vel = outer.car.x.vel / 2;
-                        collided1 = true;
+                if (call Intersects(&drop1!.physics, &outer.car!.physics)) then
+                    if drop1!.physics.y.pst < outer.car!.physics.y.pst then
+                        drop1!.physics.y.pst = outer.car!.physics.y.pst - drop1!.physics.y.len;
+                        drop1!.physics.y.vel = -(drop1!.physics.y.vel/3);
+                        drop1!.physics.x.vel = outer.car!.physics.x.vel / 2;
+                        drop1!.has_collided = true;
                     else
-                        drop1.x.vel = outer.car.x.vel * 2;
-                        drop1.y.vel = -(_abs(outer.car.x.vel));
+                        drop1!.physics.x.vel = outer.car!.physics.x.vel * 2;
+                        drop1!.physics.y.vel = -(_abs(outer.car!.physics.x.vel));
                     end
                 end
 
                 // drop vs boom
-                var& IPhysics boom;
-                loop (boom) in outer.booms do
-                    if (call Intersects(&drop1, &boom)) then
-                        var Vector2D vel = call Boom_Vel(&boom, &drop1);
-                        drop1.x.vel = drop1.x.vel + (vel.x*dt);
-                        drop1.y.vel = drop1.y.vel + (vel.y*dt);
+                var&? Boom boom;
+                loop boom in outer.booms do
+                    if (call Intersects(&drop1!.physics, &boom!.physics)) then
+                        var Vector2D vel = call Boom_Vel(&boom!.physics, &drop1!.physics);
+                        drop1!.physics.x.vel = drop1!.physics.x.vel + (vel.x*dt);
+                        drop1!.physics.y.vel = drop1!.physics.y.vel + (vel.y*dt);
                     end
                 end
             end

@@ -20,7 +20,7 @@ do
         end
     with
         every SDL_REDRAW do
-            _SDL_SetRenderDrawColor(&&outer.ren, 0xFF, 0x9D, 0x46, 0x00);
+            _SDL_SetRenderDrawColor(&&outer.sdl!.ren, 0xFF, 0x9D, 0x46, 0x00);
             var int i;
             loop i in [0 -> 12[ do
                 var SDL_Rect r =
@@ -29,39 +29,42 @@ do
                         (car.y.pst + offset.y + (radius * _sin(i*esp + pst))) as int,
                         5, 5
                     );
-                _SDL_RenderFillRect(&&outer.ren, (&&r as _SDL_Rect&&));
+                _SDL_RenderFillRect(&&outer.sdl!.ren, (&&r as _SDL_Rect&&));
             end
         end
     end
 end
 
-code/await Car (void) -> (var& IPhysics car) -> FOREVER
+code/await Car (void) -> (var& IPhysics physics) -> FOREVER
 do
-    var& IPhysics car_;
-    spawn Physics(SDL_Rect(320,430, 60,30), SDL_Color(0x3B,0xBC,0x48,0))
-            -> (&car_);
-    car = &car_;
-    spawn Wheel(&car_, Vector2D(        0, car_.y.len));
-    spawn Wheel(&car_, Vector2D(car_.x.len, car_.y.len));
+    var&? Physics car =
+        spawn Physics(SDL_Rect(320,430, 60,30), SDL_Color(0x3B,0xBC,0x48,0));
 
-    car_.x.drag = 0.95;
-    car_.y.drag = 0.95;
+    watching car do
+        physics = &car!.physics;
 
-    par do
-        loop do
-            var _SDL_KeyboardEvent&& key;
-            key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_LEFT;
-            car_.x.acc = -400;
-            key = await SDL_KEYUP   until key:keysym.sym==_SDLK_LEFT;
-            car_.x.acc = 0;
-        end
-    with
-        loop do
-            var _SDL_KeyboardEvent&& key;
-            key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_RIGHT;
-            car_.x.acc = 400;
-            key = await SDL_KEYUP   until key:keysym.sym==_SDLK_RIGHT;
-            car_.x.acc = 0;
+        spawn Wheel(&physics, Vector2D(            0, physics.y.len));
+        spawn Wheel(&physics, Vector2D(physics.x.len, physics.y.len));
+
+        physics.x.drag = 0.95;
+        physics.y.drag = 0.95;
+
+        par do
+            loop do
+                var _SDL_KeyboardEvent&& key;
+                key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_LEFT;
+                physics.x.acc = -400;
+                key = await SDL_KEYUP   until key:keysym.sym==_SDLK_LEFT;
+                physics.x.acc = 0;
+            end
+        with
+            loop do
+                var _SDL_KeyboardEvent&& key;
+                key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_RIGHT;
+                physics.x.acc = 400;
+                key = await SDL_KEYUP   until key:keysym.sym==_SDLK_RIGHT;
+                physics.x.acc = 0;
+            end
         end
     end
 end

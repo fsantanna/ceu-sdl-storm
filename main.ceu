@@ -12,20 +12,20 @@ end
 _srand(_time(null));
 
 data Vector2D with
-    var int x,y;
-end;
+    var int x;
+    var int y;
+end
 
-var& _SDL_Renderer ren;
-watching SDL_Init("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00))
-            -> (&ren)
-do
+var&? SDL_Init sdl =
+    spawn SDL_Init("Storm", WIN_W, WIN_H, SDL_Color(0x21,0x2c,0x34,0x00));
+
+watching sdl do
     #include "physics.ceu"
     #include "car.ceu"
     #include "light.ceu"
     #include "clouds.ceu"
 
-    var& IPhysics car;
-    spawn Car() -> (&car);
+    var&? Car car = spawn Car();
     spawn Clouds();
 
     #include "collisions.ceu"

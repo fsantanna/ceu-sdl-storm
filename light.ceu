@@ -30,17 +30,18 @@ do
     escape vel;
 end
 
-code/await Boom (var int x) -> (var& IPhysics boom) -> void
+code/await Boom (var int x) -> (var& IPhysics physics) -> void
 do
     var int radius = 80;
     var SDL_Rect rct = val SDL_Rect(x - radius,
                                     (WIN_H + radius*0.2 - radius) as int,
                                     radius*2,
                                     radius*2);
-    var& IPhysics boom_;
-    spawn Physics(rct,_) -> (&boom_);
-    boom = &boom_;
-    await 100ms;
+    var&? Physics boom_ = spawn Physics(rct,_);
+    watching boom_ do
+        physics = &boom_!.physics;
+        await 100ms;
+    end
 end
 pool[] Boom  booms;
 
@@ -94,8 +95,8 @@ do
             await FOREVER;
         with
             every SDL_REDRAW do
-                _SDL_SetRenderDrawColor(&&outer.ren, 0xEA, 0xD7, 0xFF, 0 );
-                _SDL_RenderDrawLine(&&outer.ren,
+                _SDL_SetRenderDrawColor(&&outer.sdl!.ren, 0xEA, 0xD7, 0xFF, 0 );
+                _SDL_RenderDrawLine(&&outer.sdl!.ren,
                                     pos_ini.x, pos_ini.y,
                                     pos_end.x, pos_end.y);
             end

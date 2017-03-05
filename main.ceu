@@ -25,7 +25,7 @@ watching sdl do
     #include "light.ceu"
     #include "clouds.ceu"
 
-    var&? Car car = spawn Car();
+    var& Car car = spawn Car();
     spawn Clouds();
 
     #include "collisions.ceu"

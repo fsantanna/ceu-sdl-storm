@@ -37,34 +37,30 @@ end
 
 code/await Car (void) -> (var& IPhysics physics) -> FOREVER
 do
-    var&? Physics car =
-        spawn Physics(SDL_Rect(320,430, 60,30), SDL_Color(0x3B,0xBC,0x48,0));
+    var& Physics car = spawn Physics(SDL_Rect(320,430, 60,30), SDL_Color(0x3B,0xBC,0x48,0));
+    physics = &car.physics;
 
-    watching car do
-        physics = &car!.physics;
+    spawn Wheel(&physics, Vector2D(            0, physics.y.len));
+    spawn Wheel(&physics, Vector2D(physics.x.len, physics.y.len));
 
-        spawn Wheel(&physics, Vector2D(            0, physics.y.len));
-        spawn Wheel(&physics, Vector2D(physics.x.len, physics.y.len));
+    physics.x.drag = 0.95;
+    physics.y.drag = 0.95;
 
-        physics.x.drag = 0.95;
-        physics.y.drag = 0.95;
-
-        par do
-            loop do
-                var _SDL_KeyboardEvent&& key;
-                key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_LEFT;
-                physics.x.acc = -400;
-                key = await SDL_KEYUP   until key:keysym.sym==_SDLK_LEFT;
-                physics.x.acc = 0;
-            end
-        with
-            loop do
-                var _SDL_KeyboardEvent&& key;
-                key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_RIGHT;
-                physics.x.acc = 400;
-                key = await SDL_KEYUP   until key:keysym.sym==_SDLK_RIGHT;
-                physics.x.acc = 0;
-            end
+    par do
+        loop do
+            var _SDL_KeyboardEvent&& key;
+            key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_LEFT;
+            physics.x.acc = -400;
+            key = await SDL_KEYUP   until key:keysym.sym==_SDLK_LEFT;
+            physics.x.acc = 0;
+        end
+    with
+        loop do
+            var _SDL_KeyboardEvent&& key;
+            key = await SDL_KEYDOWN until key:keysym.sym==_SDLK_RIGHT;
+            physics.x.acc = 400;
+            key = await SDL_KEYUP   until key:keysym.sym==_SDLK_RIGHT;
+            physics.x.acc = 0;
         end
     end
 end

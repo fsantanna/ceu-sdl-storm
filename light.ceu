@@ -37,11 +37,9 @@ do
                                     (WIN_H + radius*0.2 - radius) as int,
                                     radius*2,
                                     radius*2);
-    var&? Physics boom_ = spawn Physics(rct,_);
-    watching boom_ do
-        physics = &boom_!.physics;
-        await 100ms;
-    end
+    var& Physics boom = spawn Physics(rct,_);
+    physics = &boom.physics;
+    await 100ms;
 end
 pool[] Boom  booms;
 

@@ -93,8 +93,8 @@ do
             await FOREVER;
         with
             every SDL_REDRAW do
-                _SDL_SetRenderDrawColor(&&outer.sdl!.ren, 0xEA, 0xD7, 0xFF, 0 );
-                _SDL_RenderDrawLine(&&outer.sdl!.ren,
+                _SDL_SetRenderDrawColor(&&outer.sdl.ren, 0xEA, 0xD7, 0xFF, 0 );
+                _SDL_RenderDrawLine(&&outer.sdl.ren,
                                     pos_ini.x, pos_ini.y,
                                     pos_end.x, pos_end.y);
             end

@@ -36,7 +36,7 @@ do
             if not physics.clr? then
                 continue;
             end
-            _SDL_SetRenderDrawColor(&&outer.sdl!.ren,
+            _SDL_SetRenderDrawColor(&&outer.sdl.ren,
                                     physics.clr!.r,
                                     physics.clr!.g,
                                     physics.clr!.b,
@@ -45,7 +45,7 @@ do
                                           physics.y.pst as int,
                                           physics.x.len as int,
                                           physics.y.len as int);
-            _SDL_RenderFillRect(&&outer.sdl!.ren, (&&r as _SDL_Rect&&));
+            _SDL_RenderFillRect(&&outer.sdl.ren, (&&r as _SDL_Rect&&));
         end
     end
 end

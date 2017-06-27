@@ -20,7 +20,7 @@ do
         end
     with
         every SDL_REDRAW do
-            _SDL_SetRenderDrawColor(&&outer.sdl!.ren, 0xFF, 0x9D, 0x46, 0x00);
+            _SDL_SetRenderDrawColor(&&outer.sdl.ren, 0xFF, 0x9D, 0x46, 0x00);
             var int i;
             loop i in [0 -> 12[ do
                 var SDL_Rect r =
@@ -29,7 +29,7 @@ do
                         (car.y.pst + offset.y + (radius * _sin(i*esp + pst))) as int,
                         5, 5
                     );
-                _SDL_RenderFillRect(&&outer.sdl!.ren, (&&r as _SDL_Rect&&));
+                _SDL_RenderFillRect(&&outer.sdl.ren, (&&r as _SDL_Rect&&));
             end
         end
     end

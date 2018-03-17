@@ -1,9 +1,9 @@
 data Axis with
-    var float pst;
-    var int   len;
-    var float vel;
-    var float acc;
-    var float drag;
+    var real pst;
+    var int  len;
+    var real vel;
+    var real acc;
+    var real drag;
 end
 
 data IPhysics with
@@ -14,7 +14,7 @@ end
 
 code/await Physics (var SDL_Rect rct, var SDL_Color? clr)
                     -> (var IPhysics physics)
-                        -> FOREVER
+                        -> NEVER
 do
     physics = val IPhysics(Axis(rct.x, rct.w, 0, 0, 0),
                            Axis(rct.y, rct.h, 0, 0, 0),
@@ -23,7 +23,7 @@ do
     par do
         var int dt_;
         every dt_ in SDL_DT do
-            var float dt = (dt_ as float)/1000;
+            var real dt = (dt_ as real)/1000;
             physics.x.vel = (physics.x.vel + physics.x.acc*dt)
                                 * (1 - physics.x.drag*dt);
             physics.y.vel = (physics.y.vel + physics.y.acc*dt)

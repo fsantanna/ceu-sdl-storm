@@ -1,4 +1,4 @@
-code/await Collisions (void) -> FOREVER
+code/await Collisions (none) -> NEVER
 do
     par do
         // cloud vs cloud

@@ -8,9 +8,9 @@ do
     var Vector2D c2 = val Vector2D((other.x.pst+other.x.len/2) as int,
                                    (other.y.pst+other.y.len/2) as int);
 
-    var float dist = _sqrt(_pow(c2.x-c1.x,2) + _pow(c2.y-c1.y,2));
+    var real dist = _sqrt(_pow(c2.x-c1.x,2) + _pow(c2.y-c1.y,2));
 
-    var float pct = dist/radius;
+    var real pct = dist/radius;
     if pct > 1 then
         var Vector2D vel = val Vector2D(0,0);
         escape vel;
@@ -30,7 +30,7 @@ do
     escape vel;
 end
 
-code/await Boom (var int x) -> (var& IPhysics physics) -> void
+code/await Boom (var int x) -> (var& IPhysics physics) -> none
 do
     var int radius = 80;
     var SDL_Rect rct = val SDL_Rect(x - radius,
@@ -48,7 +48,7 @@ code/await Light (pool&[] Light    lights,
                   var     int?     direction,
                   var     int?     magnitude,
                   var     bool?    is_fork,
-                 ) -> void
+                 ) -> none
 do
     var int dir = 270;
     if direction? then
@@ -66,7 +66,7 @@ do
     end
 
     var int chaos = 30;
-    var float d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
+    var real d = PI * (dir - chaos + _rand()%(chaos*2)) / 180.0;
     var Vector2D pos_end = val Vector2D(pos_ini.x + (_cos(d) * mag),
                                         pos_ini.y - (_sin(d) * mag));
 
